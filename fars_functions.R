@@ -1,13 +1,15 @@
-#' Read FARS data into a data frame
+#' Read FARS data into a data frame.
 #' 
 #' \code{fars_read} is a helper function designed to read data downloaded from 
-#' the Fatality Analysis Reporting System 
-#' \href{https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars}{FARS}.
+#' the Fatality Analysis Reporting System (FARS).
 #' 
-#' Conditions that may result in an error include:
+#' @source FARS data can be from 
+#' \href{https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars}{here}.
+#' 
+#' @notes Conditions that may result in an error include:
 #' \itemize{
-#'   \item \code{fars_read} uses functions from the packages \code{dplyr} and 
-#'     \code{readr} and they therefore must be installed prior to use. 
+#'   \item \code{fars_read} uses functions from the packages \code{\link{dplyr}} 
+#'     and \code{\link{readr}} and they therefore must be installed prior to use. 
 #'   \item \code{fars_read} also expects the character string of the FARS data 
 #'     file name to be the full file name (i.e. include the file extension).
 #'     } 
@@ -17,7 +19,7 @@
 #'    working directory.
 #'    
 #' @return This function unzips the FARS data and returns a data frame of class
-#'    tbl_df.
+#'    'tbl_df', 'tbl' and 'data.frame'.
 #' 
 #' @examples 
 #' \dontrun{
@@ -33,13 +35,17 @@ fars_read <- function(filename) {
   dplyr::tbl_df(data)
 }
 
-#' Make generic FARS data file name
+#' Make generic FARS data file name.
 #' 
-#' \code{make_filename} is a helper function that constructs the correct FARS 
-#' data file name given a year. This function can be used to generate the input 
-#' required for the \code{\link{fars_read}} function.
+#' \code{make_filename} is a helper function that constructs the correct 
+#' Fatality Analysis Reporting System (FARS) data file name given a year. This 
+#' function can be used to generate the input required for the 
+#' \code{\link{fars_read}} function.
 #' 
-#' Conditions that may result in an error include:
+#' @source FARS data can be from 
+#' \href{https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars}{here}. 
+#' 
+#' @notes Conditions that may result in an error include:
 #' \itemize{
 #'   \item \code{make_filename} will not recognise inputs that cannot be coerced
 #'   to an integer. For example 2013 and "2013" are acceptable inputs whereas
@@ -61,6 +67,55 @@ make_filename <- function(year) {
   sprintf("accident_%d.csv.bz2", year)
 }
 
+
+#' Read multiple years of FARS data into a list of data frames.
+#' 
+#' Given a vector of years corresponding to Fatality Analysis Reporting System 
+#' (FARS) data file names,  \code{fars_read_years} will read each of the FARS 
+#' data files and create a list of data frames of the months and years contained 
+#' in each FARS data file.
+#' 
+#' @source FARS data can be from 
+#' \href{https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars}{here}. 
+#' 
+#' @notes Conditions that may result in an error include:
+#' \itemize{
+#'   \item This function uses \code{\link{make_filename}} and as such it must be 
+#'     loaded into the NAMESPACE.
+#'   \item This function and others that it rely on, \code{\link{make_filename}},
+#'     require the packages \code{\link{dplyr}} and \code{\link{readr}} to be 
+#'     installed.
+#'   \item This function also requires that the package \code{\link{dpyr}} is 
+#'     loaded into the NAMESPACE.
+#'   \item This function must be run from the same location as the downloaded
+#'     FARS data files.
+#'   \item Providing a vector of years where there is no corresponding FARS data
+#'     file will result in an error for that year/years. The function will still 
+#'     return a list however, and it will contain results for years that do have 
+#'     a corresponding FARS data file.
+#'   }
+#'   
+#' @param years A character or numeric vector representing the years of the FARS 
+#' data files required for further processing.
+#' 
+#' @return The function will return a list containing as many data frames as 
+#' years provided as input. The list is of class 'list' whilst the individual 
+#' data frames are of class 'tbl_df', 'tbl' and 'data.frame'. Each data frame 
+#' contains the columns:
+#' \describe{
+#'  \item{MONTH}{The months corresponding to each observation in the FARS data 
+#'  file}
+#'  \item{year}{The year corresponding to each observation in the FARS data file}}
+#' 
+#' @importfrom dplyr readr
+#'  
+#' @examples 
+#'  \dontrun{
+#'  fars_read_years(c(2013, 2014, 2015))
+#'  fars_read_years(c("2013", "2014", "2015"))
+#'  }
+#'  
+#'  @export
 fars_read_years <- function(years) {
   lapply(years, function(year) {
     file <- make_filename(year)
@@ -75,6 +130,54 @@ fars_read_years <- function(years) {
   })
 }
 
+
+#' Summarise FARS data.
+#' 
+#' Given a vector of years corresponding to Fatality Analysis Reporting System 
+#' (FARS) data file names, \code{fars_summarize_years} will read each of the FARS 
+#' data files and create a single data frame summarising fatalities by month for 
+#' the input years.
+#' 
+#' @source FARS data can be from 
+#' \href{https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars}{here}.
+#' 
+#' @notes Conditions that may result in an error include:
+#' \itemize{
+#'   \item This function uses \code{\link{make_filename}} and 
+#'     \code{link{fars_read_years}}. As such they must be loaded into the 
+#'     NAMESPACE.
+#'   \item This function and others that it rely on, \code{\link{make_filename}}
+#'     and \code{link{fars_read_years}}, require the packages \code{\link{dplyr}}, 
+#'     \code{\link{readr}} and \code{\link{tidyr}} to be installed.
+#'   \item This function also requires that the package \code{\link{dpyr}} is 
+#'     loaded into the NAMESPACE.
+#'   \item This function must be run from the same location as the downloaded
+#'     FARS data files.
+#'   \item Providing a vector of years where there is no corresponding FARS data
+#'     file will result in an error for that year/years. The function will still 
+#'     return a data frame however, and it will contain results for years that 
+#'     do have a corresponding FARS data file.
+#'   }     
+#' 
+#' @inheritParams fars_read_years
+#' 
+#' @return This function will return a data frame of class 'tbl_df', 'tbl' and 
+#' 'data.frame'. The data frame will contain columns:
+#' \describe{
+#'  \item{MONTH}{Numerical month abbreviations 1-12}
+#'  \item{YYYY}{'YYYY' represents a named year. There will be a separate column 
+#'  for each year as provided in the vector of years as input. Each column will 
+#'  contain the number of fatalities per month for that year.}
+#' 
+#' @importfrom dplyr readr
+#' 
+#' @examples 
+#' \dontrun{
+#' fars_summarize_years(c(2013, 2014, 2015))
+#' fars_summarize_years(c("2013", "2014", "2015"))
+#' }
+#' 
+#' @export
 fars_summarize_years <- function(years) {
   dat_list <- fars_read_years(years)
   dplyr::bind_rows(dat_list) %>% 
@@ -83,6 +186,45 @@ fars_summarize_years <- function(years) {
     tidyr::spread(year, n)
 }
 
+
+#' Plot a map of accidents from FARS data
+#' 
+#' Given a US State number and a year, this function will produce a simple black 
+#' and white map indicating accident locations as contained in a FARS data file.
+#' 
+#' @source FARS data can be from 
+#' \href{https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars}{here}.
+#' 
+#' @notes Conditions that may result in an error include:
+#' \itemize{
+#'   \item This function uses \code{\link{make_filename}} and 
+#'     \code{\link{fars_read}} and these must be loaded into the NAMESPACE.
+#'   \item This function also requires the packages \code{\link{dplyr}} and 
+#'     \code{\link{maps}} to be installed and loaded into the NAMESPACE.
+#'   \item Providing an incorrect US State number.
+#'   \item The year input must be coerceable to class integer.
+#'   \item The provided year must correspond to a downloaded FARS data file.
+#'   \item The function must be run from the same location as the downloaded 
+#'     FARS files that require analysis.
+#'   }
+#' 
+#' @param state.num An integer or character representing the number 
+#'  corresponding to the State in the US for analysis.
+#' @inheritParams make_filename
+#' 
+#' @return A map plot of accident locations, represented as points, for a given 
+#' US State and year with information from the appropriate FARS data file. The 
+#' State boundary will also be drawn.
+#' 
+#' @importFrom dplyr readr maps
+#' 
+#' @examples 
+#' \dontrun{
+#' fars_map_state(47, 2013)
+#' fars_map_state("47", "2013")
+#' }
+#' 
+#' @export
 fars_map_state <- function(state.num, year) {
   filename <- make_filename(year)
   data <- fars_read(filename)
