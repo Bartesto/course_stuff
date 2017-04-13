@@ -1,24 +1,17 @@
-wkdir <- paste0("Z:\\DOCUMENTATION\\BART\\R\\Coursera\\MasteringSoftwareDevelopment\\",
-                "doco_assignment")
+library(dplyr)
 
-setwd(wkdir)
 
-fname <- "data/accident_2013"
+
+
+year <- 2013
+fname <- make_filename(year)
 data <- fars_read(fname)
 
+years <- c(2013, 2014, 2015)
+data3 <- fars_read_years(c(2014, 2016))
 
-filename <- make_filename(2013)
+data4 <- fars_summarize_years(c(2014, 2016))
 
-year <- "2013"
-year <- 2013
-as.integer(year)
-
-
-listyrs <- list()
-
-data2 <- fars_read_years(listyrs)
-
-class(data)
 
 fars_read <- function(filename) {
   if(!file.exists(filename))
@@ -76,3 +69,7 @@ fars_map_state <- function(state.num, year) {
     graphics::points(LONGITUD, LATITUDE, pch = 46)
   })
 }
+library(maps)
+library(dplyr)
+fars_map_state("48", "2016")
+
